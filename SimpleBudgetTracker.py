@@ -1,37 +1,42 @@
+from datetime import datetime
+
 #This is a simple budget tracker. You can track income, record expenses, and calculate the budget balance.
 
-def validate_date(date):
-    #check's if the date format is correct
-        if date[4] == '-' and date[7] == '-' and len(date) == 10 and date[:2].isdigit() and date[3:5].isdigit() and date[6:].isdigit():
-            month = int(date[:2])
-            day = int(date[3:5])
-            year = int(date[6:])
-        
-          #check's if the month is a valid number
-            if 1 <= month <= 12:
-            #check's if the day is valid (will be updated to check amount of day's in the month eventually)
-              if 1 <= day <= 31:
-                return True
-              else:
-                print("Invalid day. Please enter a valid day (01-31).")
-                return False
-            else:
-                print("Invalid month. Please enter a valid month (01-12).")
-                return False
-        else:
-            print("Invalid date format. Please enter the date in the format MM-DD-YYYY.")
-            return False
-
-#get's user's income data
-def income_add():
+def get_date():
+  #Validaes the data format and checks for valid month and day
+  while True:
     try:
-        amount = int(input("Enter amount here: "))
-        description = input("Enter description here: ")
-        date = input("Enter a date (MM-DD-YYYY): ")
+      date = input("Enter date here (MM-DD-YYYY): ")
+      date_format = "%m-%d-%Y"
+      date_object = datetime.strptime(date, date_format)
 
-        if not validate_date(date):
-            return None
-    
+      return date
+    except ValueError:
+       print("Invalid date detected please re-enter.")
+       
+        
+           
+
+#Get's the user to enter a valid monetary amount.
+def enter_amount():
+  while True:
+    try:
+      amount = float(input("Enter amount here: "))
+      if amount <= 0:
+          print("Amount must be greater than zero.")
+      else:
+          return amount
+    except ValueError:
+        print("Invalid input. Please enter a valid number.")
+
+
+def income_add():
+  #Promt's the user to add an income entry.
+    try:
+        amount = enter_amount()
+        description = input("Enter description here: ")
+        date = get_date()
+
         income_entry = {"amount": amount, "description": description, "date": date}
         print("Income added: ", income_entry)
         return income_entry
@@ -39,21 +44,19 @@ def income_add():
         print("Please enter a valid value.")
         return
     
-#add's every amount input from income_records and returns the total amount
+
 def income_calculator(income_records):
+  #Calculate the total income.
     total_income = sum(entry["amount"] for entry in income_records)
     return total_income
  
 
-#get's user expense data
 def expense_add():
+  #Prompt's the user to add an expesne entry
    try:
-        amount = int(input("Enter amount here: "))
+        amount = enter_amount()
         description = input("Enter description here: ")
-        date = input("Enter a date (MM-DD-YYYY): ")
-
-        if not validate_date(date):
-            return None
+        date = get_date()
 
         expense_entry = {"amount": amount, "description": description, "date": date}
         print("Expense added: ", expense_entry)
@@ -62,8 +65,9 @@ def expense_add():
         print("Please enter a valid value.")
         return
    
-#add's every amount input from expense_records and returns the total amount
+
 def expense_calculator(expense_records):
+  #calculate the total expense value.
     total_expenses = sum(entry["amount"] for entry in expense_records)
     return total_expenses
 
@@ -78,10 +82,14 @@ while True:
   
   #add's transaction to the records
   if transaction_type == "income":
-      income_records.append(income_add())
+      income = income_add()
+      if income:
+        income_records.append(income)
   
   elif transaction_type == "expense":
-      expense_records.append(expense_add())
+      expense = expense_add()
+      if expense:
+        expense_records.append(expense)
 
   #get's the total balance
   total_income = income_calculator(income_records)
@@ -90,20 +98,25 @@ while True:
   #subtraces expenses from income
   balance = total_income - total_expenses
 
-  #print's leftover balance
-  print(f"Current Balacne: {balance}")
+  print()
 
-  print("")
+  #print's leftover balance
+  print(f"Current Balance: ${balance: .2f}")
+  
+  print()
 
   #get's input from user to check if they want to make another entry
   repeat = input("Would you like to input another entry? yes or no: ")
+
+  print()
 
   #check's if the user want's to input another entry
   if repeat.lower() == "yes":
     continue
   elif repeat.lower() == "no":
-     print("here are you're income records: ")
+     print("Here are you're income records: ")
      print(income_records)
+     print()
      print("Here are you're expense records")
      print(expense_records)
      break
